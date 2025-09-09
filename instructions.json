@@ -1,0 +1,50 @@
+[
+	{
+		"mnemonic": "add",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "000",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "addi",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "000",
+		"operand_order": ["rd", "rs1", "imm12"],
+		"aliases": ["nop", "mv"]
+	},
+	{
+		"mnemonic": "sub",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "000",
+		"funct7": "0100000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "mv",
+		"format": "ALIAS",
+		"expansion": ["addi {rd}, {rs}, 0"],
+		"operand_order": ["rd", "rs"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "beq",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "000",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lui",
+		"format": "U",
+		"opcode": "0110111",
+		"operand_order": ["rd", "imm20"],
+		"aliases": []
+	}
+]
