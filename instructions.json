@@ -9,6 +9,87 @@
 		"aliases": []
 	},
 	{
+		"mnemonic": "sub",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "000",
+		"funct7": "0100000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": ["neg"]
+	},
+	{
+		"mnemonic": "xor",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "100",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "or",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "110",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "and",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "111",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sll",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "001",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "srl",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "101",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sra",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "101",
+		"funct7": "0100000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "slt",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "010",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": ["sltz", "sgtz"]
+	},
+	{
+		"mnemonic": "sltu",
+		"format": "R",
+		"opcode": "0110011",
+		"funct3": "011",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "rs2"],
+		"aliases": ["snez"]
+	},
+	{
 		"mnemonic": "addi",
 		"format": "I",
 		"opcode": "0010011",
@@ -17,12 +98,110 @@
 		"aliases": ["nop", "mv"]
 	},
 	{
-		"mnemonic": "sub",
-		"format": "R",
-		"opcode": "0110011",
-		"funct3": "000",
+		"mnemonic": "xori",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "100",
+		"operand_order": ["rd", "rs1", "imm12"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "ori",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "110",
+		"operand_order": ["rd", "rs1", "imm12"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "andi",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "111",
+		"operand_order": ["rd", "rs1", "imm12"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "slli",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "001",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "shamt"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "srli",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "101",
+		"funct7": "0000000",
+		"operand_order": ["rd", "rs1", "shamt"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "srai",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "101",
 		"funct7": "0100000",
-		"operand_order": ["rd", "rs1", "rs2"],
+		"operand_order": ["rd", "rs1", "shamt"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "slti",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "010",
+		"operand_order": ["rd", "rs1", "imm"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sltiu",
+		"format": "I",
+		"opcode": "0010011",
+		"funct3": "011",
+		"operand_order": ["rd", "rs1", "imm"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lb",
+		"format": "I",
+		"opcode": "0000011",
+		"funct3": "000",
+		"operand_order": ["rd", "imm", "rs1"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lh",
+		"format": "I",
+		"opcode": "0000011",
+		"funct3": "001",
+		"operand_order": ["rd", "imm", "rs1"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lw",
+		"format": "I",
+		"opcode": "0000011",
+		"funct3": "010",
+		"operand_order": ["rd", "imm", "rs1"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lbu",
+		"format": "I",
+		"opcode": "0000011",
+		"funct3": "100",
+		"operand_order": ["rd", "imm", "rs1"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "lhu",
+		"format": "I",
+		"opcode": "0000011",
+		"funct3": "101",
+		"operand_order": ["rd", "imm", "rs1"],
 		"aliases": []
 	},
 	{
@@ -33,18 +212,219 @@
 		"aliases": []
 	},
 	{
+		"mnemonic": "sb",
+		"format": "S",
+		"opcode": "0100011",
+		"funct3": "000",
+		"operand_order": ["rs2", "rs1", "imm"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sh",
+		"format": "S",
+		"opcode": "0100011",
+		"funct3": "001",
+		"operand_order": ["rs2", "rs1", "imm"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sw",
+		"format": "S",
+		"opcode": "0100011",
+		"funct3": "010",
+		"operand_order": ["rs2", "rs1", "imm"],
+		"aliases": []
+	},
+	{
 		"mnemonic": "beq",
 		"format": "B",
 		"opcode": "1100011",
 		"funct3": "000",
 		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["beqz"]
+	},
+	{
+		"mnemonic": "bne",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "001",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["bnez"]
+	},
+	{
+		"mnemonic": "blt",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "100",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["bltz", "bgtz", "bgt"]
+	},
+	{
+		"mnemonic": "bge",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "101",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["blez", "bgez", "ble"]
+	},
+	{
+		"mnemonic": "bltu",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "110",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["bgtu"]
+	},
+	{
+		"mnemonic": "bgeu",
+		"format": "B",
+		"opcode": "1100011",
+		"funct3": "111",
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": ["bleu"]
+	},
+	{
+		"mnemonic": "jal",
+		"format": "J",
+		"opcode": "1101111",
+		"operand_order": ["rd", "label"],
 		"aliases": []
+	},
+	{
+		"mnemonic": "jalr",
+		"format": "I",
+		"opcode": "1100111",
+		"funct3": "000",
+		"operand_order": ["rd", "rs1", "imm12"],
+		"aliases": ["ret"]
 	},
 	{
 		"mnemonic": "lui",
 		"format": "U",
 		"opcode": "0110111",
 		"operand_order": ["rd", "imm20"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "auipc",
+		"format": "U",
+		"opcode": "0010111",
+		"operand_order": ["rd", "imm20"],
+		"aliases": ["la", "l", "s", "call", "tail"]
+	},
+	{
+		"mnemonic": "ecall",
+		"format": "I",
+		"opcode": "1110011",
+		"funct3": "000",
+		"operand_order": [],
+		"aliases": []
+	},
+	{
+		"mnemonic": "ebreak",
+		"format": "I",
+		"opcode": "1110011",
+		"funct3": "000",
+		"operand_order": [],
+		"immediate": 1,
+		"aliases": []
+	},
+	{
+		"mnemonic": "neg",
+		"format": "ALIAS",
+		"expansion": ["sub {rd}, x0, {rs}"],
+		"operand_order": ["rd", "rs"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sltz",
+		"format": "ALIAS",
+		"expansion": ["slt {rd}, {rs}, x0"],
+		"operand_order": ["rd", "rs"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "sgtz",
+		"format": "ALIAS",
+		"expansion": ["slt {rd}, x0, {rs}"],
+		"operand_order": ["rd", "rs"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "snez",
+		"format": "ALIAS",
+		"expansion": ["sltu {rd}, x0, {rs}"],
+		"operand_order": ["rd", "rs"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "beqz",
+		"format": "ALIAS",
+		"expansion": ["beq {rs}, x0, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bnez",
+		"format": "ALIAS",
+		"expansion": ["bne {rs}, x0, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bltz",
+		"format": "ALIAS",
+		"expansion": ["blt {rs}, x0, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bgtz",
+		"format": "ALIAS",
+		"expansion": ["blt x0, {rs}, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bgt",
+		"format": "ALIAS",
+		"expansion": ["blt {rs2}, {rs1}, {label}"],
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "blez",
+		"format": "ALIAS",
+		"expansion": ["bge x0, {rs}, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bgez",
+		"format": "ALIAS",
+		"expansion": ["bge {rs}, x0, {label}"],
+		"operand_order": ["rs", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "ble",
+		"format": "ALIAS",
+		"expansion": ["bge {rs2}, {rs1}, {label}"],
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bgtu",
+		"format": "ALIAS",
+		"expansion": ["bltu {rs2}, {rs1}, {label}"],
+		"operand_order": ["rs1", "rs2", "label"],
+		"aliases": []
+	},
+	{
+		"mnemonic": "bleu",
+		"format": "ALIAS",
+		"expansion": ["bgeu {rs2}, {rs1}, {label}"],
+		"operand_order": ["rs1", "rs2", "label"],
 		"aliases": []
 	}
 ]
