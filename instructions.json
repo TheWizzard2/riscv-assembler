@@ -1,276 +1,254 @@
 {
-    "instructions": {
-        "R": [{
-                "mnemonic": "add",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "000",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "sub",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "000",
-                "funct7": "0100000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "sll",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "001",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "slt",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "010",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "sltu",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "011",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "xor",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "100",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "srl",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "101",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "sra",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "101",
-                "funct7": "0100000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "or",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "110",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            },
-            {
-                "mnemonic": "and",
-                "format": "R",
-                "opcode": "0110011",
-                "funct3": "111",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "rs2"]
-            }
-        ],
-        "I": [{
-                "mnemonic": "addi",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "000",
-                "operand_order": ["rd", "rs1", "imm12"]
-            },
-            {
-                "mnemonic": "xori",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "100",
-                "operand_order": ["rd", "rs1", "imm12"]
-            },
-            {
-                "mnemonic": "ori",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "110",
-                "operand_order": ["rd", "rs1", "imm12"]
-            },
-            {
-                "mnemonic": "andi",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "111",
-                "operand_order": ["rd", "rs1", "imm12"]
-            },
-            {
-                "mnemonic": "slli",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "001",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "shamt"]
-            },
-            {
-                "mnemonic": "srli",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "101",
-                "funct7": "0000000",
-                "operand_order": ["rd", "rs1", "shamt"]
-            },
-            {
-                "mnemonic": "srai",
-                "format": "I",
-                "opcode": "0010011",
-                "funct3": "101",
-                "funct7": "0100000",
-                "operand_order": ["rd", "rs1", "shamt"]
-            },
-            {
-                "mnemonic": "jalr",
-                "format": "I",
-                "opcode": "1100111",
-                "funct3": "000",
-                "operand_order": ["rd", "rs1", "imm12"]
-            },
-            {
-                "mnemonic": "lb",
-                "format": "I",
-                "opcode": "0000011",
-                "funct3": "000",
-                "operand_order": ["rd", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "lh",
-                "format": "I",
-                "opcode": "0000011",
-                "funct3": "001",
-                "operand_order": ["rd", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "lw",
-                "format": "I",
-                "opcode": "0000011",
-                "funct3": "010",
-                "operand_order": ["rd", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "lbu",
-                "format": "I",
-                "opcode": "0000011",
-                "funct3": "100",
-                "operand_order": ["rd", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "lhu",
-                "format": "I",
-                "opcode": "0000011",
-                "funct3": "101",
-                "operand_order": ["rd", "imm12", "rs1"]
-            }
-        ],
-        "S": [{
-                "mnemonic": "sb",
-                "format": "S",
-                "opcode": "0100011",
-                "funct3": "000",
-                "operand_order": ["rs2", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "sh",
-                "format": "S",
-                "opcode": "0100011",
-                "funct3": "001",
-                "operand_order": ["rs2", "imm12", "rs1"]
-            },
-            {
-                "mnemonic": "sw",
-                "format": "S",
-                "opcode": "0100011",
-                "funct3": "010",
-                "operand_order": ["rs2", "imm12", "rs1"]
-            }
-        ],
-        "B": [{
-                "mnemonic": "beq",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "000",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            },
-            {
-                "mnemonic": "bne",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "001",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            },
-            {
-                "mnemonic": "blt",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "100",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            },
-            {
-                "mnemonic": "bge",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "101",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            },
-            {
-                "mnemonic": "bltu",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "110",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            },
-            {
-                "mnemonic": "bgeu",
-                "format": "B",
-                "opcode": "1100011",
-                "funct3": "111",
-                "operand_order": ["rs1", "rs2", "imm13"]
-            }
-        ],
-        "U": [{
-                "mnemonic": "lui",
-                "format": "U",
-                "opcode": "0110111",
-                "operand_order": ["rd", "imm20"]
-            },
-            {
-                "mnemonic": "auipc",
-                "format": "U",
-                "opcode": "0010111",
-                "operand_order": ["rd", "imm20"]
-            }
-        ],
-        "J": [{
+    "instructions": [{
+            "mnemonic": "add",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "sub",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "sll",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "slt",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "xor",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "srl",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "or",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "and",
+            "format": "R",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "rs2"],
+            "aliases": []
+        },
+
+        {
+            "mnemonic": "addi",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "andi",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "ori",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "jalr",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "rs1", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "lb",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "imm(rs1)"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "lw",
+            "format": "I",
+            "expansion": [],
+            "operand_order": ["rd", "imm(rs1)"],
+            "aliases": []
+        },
+
+        {
+            "mnemonic": "sb",
+            "format": "S",
+            "expansion": [],
+            "operand_order": ["rs2", "imm(rs1)"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "sw",
+            "format": "S",
+            "expansion": [],
+            "operand_order": ["rs2", "imm(rs1)"],
+            "aliases": []
+        },
+
+        {
+            "mnemonic": "beq",
+            "format": "B",
+            "expansion": [],
+            "operand_order": ["rs1", "rs2", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "bne",
+            "format": "B",
+            "expansion": [],
+            "operand_order": ["rs1", "rs2", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "blt",
+            "format": "B",
+            "expansion": [],
+            "operand_order": ["rs1", "rs2", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "bge",
+            "format": "B",
+            "expansion": [],
+            "operand_order": ["rs1", "rs2", "label"],
+            "aliases": []
+        },
+
+        {
+            "mnemonic": "lui",
+            "format": "U",
+            "expansion": [],
+            "operand_order": ["rd", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "auipc",
+            "format": "U",
+            "expansion": [],
+            "operand_order": ["rd", "imm"],
+            "aliases": []
+        },
+
+        {
             "mnemonic": "jal",
             "format": "J",
-            "opcode": "1101111",
-            "operand_order": ["rd", "imm20"]
-        }]
-    },
-    "pseudoinstructions": [
-        { "mnemonic": "nop", "expansion": "addi x0, x0, 0" },
-        { "mnemonic": "mv", "expansion": "addi {rd}, {rs1}, 0" },
-        { "mnemonic": "li", "expansion": "addi {rd}, x0, {imm}" },
-        { "mnemonic": "not", "expansion": "xori {rd}, {rs1}, -1" },
-        { "mnemonic": "neg", "expansion": "sub {rd}, x0, {rs1}" },
-        { "mnemonic": "j", "expansion": "jal x0, {label}" },
-        { "mnemonic": "jr", "expansion": "jalr x0, {rs1}, 0" },
-        { "mnemonic": "ret", "expansion": "jalr x0, x1, 0" },
-        { "mnemonic": "call", "expansion": "jal x1, {label}" },
-        { "mnemonic": "tail", "expansion": "jal x0, {label}" }
+            "expansion": [],
+            "operand_order": ["rd", "label"],
+            "aliases": []
+        },
+
+        {
+            "mnemonic": "nop",
+            "format": "ALIAS",
+            "expansion": ["addi x0, x0, 0"],
+            "operand_order": [],
+            "aliases": []
+        },
+        {
+            "mnemonic": "li",
+            "format": "ALIAS",
+            "expansion": ["addi {rd}, x0, {imm}"],
+            "operand_order": ["rd", "imm"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "mv",
+            "format": "ALIAS",
+            "expansion": ["addi {rd}, {rs}, 0"],
+            "operand_order": ["rd", "rs"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "not",
+            "format": "ALIAS",
+            "expansion": ["xori {rd}, {rs}, -1"],
+            "operand_order": ["rd", "rs"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "neg",
+            "format": "ALIAS",
+            "expansion": ["sub {rd}, x0, {rs}"],
+            "operand_order": ["rd", "rs"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "seqz",
+            "format": "ALIAS",
+            "expansion": ["sltiu {rd}, {rs}, 1"],
+            "operand_order": ["rd", "rs"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "bnez",
+            "format": "ALIAS",
+            "expansion": ["bne {rs}, x0, {label}"],
+            "operand_order": ["rs", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "beqz",
+            "format": "ALIAS",
+            "expansion": ["beq {rs}, x0, {label}"],
+            "operand_order": ["rs", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "bgez",
+            "format": "ALIAS",
+            "expansion": ["bge {rs}, x0, {label}"],
+            "operand_order": ["rs", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "bltz",
+            "format": "ALIAS",
+            "expansion": ["blt {rs}, x0, {label}"],
+            "operand_order": ["rs", "label"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "jr",
+            "format": "ALIAS",
+            "expansion": ["jalr x0, {rs}, 0"],
+            "operand_order": ["rs"],
+            "aliases": []
+        },
+        {
+            "mnemonic": "ret",
+            "format": "ALIAS",
+            "expansion": ["jalr x0, x1, 0"],
+            "operand_order": [],
+            "aliases": []
+        }
     ]
 }
