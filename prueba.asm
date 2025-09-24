@@ -1,5 +1,4 @@
 # Programa ejemplo
-loop:
-    add x5, x6, x7   # suma
-    beq x5, x6, loop
-    mv a0, x5
+add x5, x6, x7 # prueba
+sll x8, x9, x10
+sub x11, x12, x13
