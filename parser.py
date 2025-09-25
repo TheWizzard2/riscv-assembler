@@ -135,6 +135,25 @@ def encode_r_type(instr, funct3, funct7, opcode):
         "hex": instr_hex
     }
 
+#codifica una instruccion tipò I en su representacion binaria y hexadecimal
+def encode_i_type(rd, rs1, imm, funct3, opcode):
+        # convertir inmediato a 12 bits con signo
+    imm = int(imm)
+    if imm < 0:
+        imm = (1 << 12) + imm   # complemento a 2
+    imm_bin = format(imm & 0xFFF, "012b")
+
+    rd_bin = format(int(rd), "05b")
+    rs1_bin = format(int(rs1), "05b")
+
+    # orden del formato I
+    bin_str = imm_bin + rs1_bin + funct3 + rd_bin + opcode
+    hex_str = format(int(bin_str, 2), "08x")
+    return {
+        "bin": bin_str,
+        "hex": hex_str
+    }
+
 
 # Prueba del parser
 file_instr = parse_file("prueba.asm")
@@ -146,16 +165,28 @@ for instr in file_instr:
     # Extraemos el tipo de instrucción
     type_instr = extract_type(instr["mnemonic"])
 
-    # Extraemos funct3, funct7 y opcode
-    funct_3 = get_funct3(instr["mnemonic"])
-    funct_7 = get_funct7(instr["mnemonic"])
-    opcode = get_opcode(instr["mnemonic"])
+
 
     # Codificación según tipo
     match type_instr:
         case "R":
+            # Extraemos funct3, funct7 y opcode
+            funct_3 = get_funct3(instr["mnemonic"])
+            funct_7 = get_funct7(instr["mnemonic"])
+            opcode = get_opcode(instr["mnemonic"])
             encoded = encode_r_type(instr, funct_3, funct_7, opcode)
             instrucciones_cod.append(encoded)
+
+        case "I":
+            # Extraemos funct3, funct7 y opcode
+            funct_3 = get_funct3(instr["mnemonic"])
+            opcode = get_opcode(instr["mnemonic"])
+            rd = instr["operands"][0].replace("x", "")
+            rs1 = instr["operands"][1].replace("x", "")
+            imm = instr["operands"][2]   # aquí puede venir en decimal o negativo
+            encoded = encode_i_type(rd, rs1, imm, funct_3, opcode)
+            instrucciones_cod.append(encoded)
+            
 
 # Escribir archivos de salida
 with open("resultado.txt", "w") as f:
