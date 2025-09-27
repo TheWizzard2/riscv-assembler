@@ -136,19 +136,20 @@ def encode_r_type(instr, funct3, funct7, opcode):
     }
 
 #codifica una instruccion tipò I en su representacion binaria y hexadecimal
-def encode_i_type(rd, rs1, imm, funct3, opcode):
-        # convertir inmediato a 12 bits con signo
-    imm = int(imm)
-    if imm < 0:
-        imm = (1 << 12) + imm   # complemento a 2
-    imm_bin = format(imm & 0xFFF, "012b")
+def encode_i_type(instr, funct3, opcode):
+    rd = int(instr["operands"][0][1:])   # destino
+    rs1 = int(instr["operands"][1][1:])  # registro base
+    imm = int(instr["operands"][2])      # inmediato (decimal)
 
-    rd_bin = format(int(rd), "05b")
-    rs1_bin = format(int(rs1), "05b")
+    imm_bin    = format(imm & 0xFFF, "012b")   # inmediato 12 bits
+    rs1_bin    = format(rs1, "05b")
+    funct3_bin = format(int(funct3, 2), "03b") # viene en binario -> lo normalizamos
+    rd_bin     = format(rd, "05b")
+    opcode_bin = format(int(opcode, 2), "07b") # igual acá
 
-    # orden del formato I
-    bin_str = imm_bin + rs1_bin + funct3 + rd_bin + opcode
-    hex_str = format(int(bin_str, 2), "08x")
+    bin_str = imm_bin + rs1_bin + funct3_bin + rd_bin + opcode_bin
+    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+
     return {
         "bin": bin_str,
         "hex": hex_str
@@ -181,10 +182,7 @@ for instr in file_instr:
             # Extraemos funct3, funct7 y opcode
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
-            rd = instr["operands"][0].replace("x", "")
-            rs1 = instr["operands"][1].replace("x", "")
-            imm = instr["operands"][2]   # aquí puede venir en decimal o negativo
-            encoded = encode_i_type(rd, rs1, imm, funct_3, opcode)
+            encoded = encode_i_type(instr, funct_3, opcode)
             instrucciones_cod.append(encoded)
             
 
