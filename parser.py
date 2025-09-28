@@ -178,6 +178,7 @@ for instr in file_instr:
     # Codificación según tipo
     match type_instr:
         case "R":
+            # Extraemos funct3, funct7 
             funct_3 = get_funct3(instr["mnemonic"])
             funct_7 = get_funct7(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
@@ -188,6 +189,17 @@ for instr in file_instr:
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_s_type(instr, funct_3, opcode)
             instrucciones_cod.append(encoded)
+
+        case "I":
+            # Extraemos funct3, funct7 y opcode
+            funct_3 = get_funct3(instr["mnemonic"])
+            opcode = get_opcode(instr["mnemonic"])
+            rd = instr["operands"][0].replace("x", "")
+            rs1 = instr["operands"][1].replace("x", "")
+            imm = instr["operands"][2]   # aquí puede venir en decimal o negativo
+            encoded = encode_i_type(rd, rs1, imm, funct_3, opcode)
+            instrucciones_cod.append(encoded)
+            
 
 # Escribir archivos de salida
 with open("resultado.txt", "w") as f:
