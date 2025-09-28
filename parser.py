@@ -135,25 +135,35 @@ def encode_r_type(instr, funct3, funct7, opcode):
         "hex": instr_hex
     }
 
-#codifica una instruccion tipò I en su representacion binaria y hexadecimal
-def encode_i_type(rd, rs1, imm, funct3, opcode):
-        # convertir inmediato a 12 bits con signo
-    imm = int(imm)
-    if imm < 0:
-        imm = (1 << 12) + imm   # complemento a 2
-    imm_bin = format(imm & 0xFFF, "012b")
+# Codifica una instrucción tipo-S en su representación binaria
+def encode_s_type(instr, funct3, opcode):
+    # Asumimos que funct3 y opcode vienen en string binario
+    funct3 = int(funct3, 2)
+    opcode = int(opcode, 2)
 
-    rd_bin = format(int(rd), "05b")
-    rs1_bin = format(int(rs1), "05b")
+    # Operandos
+    rs2 = int(instr["operands"][0][1:])
+    offset, base = instr["operands"][1].split("(")
+    rs1 = int(base[1:-1])  # quitar "x" y ")"
+    imm = int(offset)
 
-    # orden del formato I
-    bin_str = imm_bin + rs1_bin + funct3 + rd_bin + opcode
-    hex_str = format(int(bin_str, 2), "08x")
+    # Convertir a binarios
+    rs1_bin    = format(rs1, "05b")
+    rs2_bin    = format(rs2, "05b")
+    funct3_bin = format(funct3, "03b")
+    opcode_bin = format(opcode, "07b")
+
+    imm_bin = format(imm & 0xFFF, "012b")  # inmediato a 12 bits
+    imm_high = imm_bin[:7]   # imm[11:5]
+    imm_low  = imm_bin[7:]   # imm[4:0]
+
+    instr_bin = imm_high + rs2_bin + rs1_bin + funct3_bin + imm_low + opcode_bin
+    instr_hex = hex(int(instr_bin, 2))[2:].zfill(8)
+
     return {
-        "bin": bin_str,
-        "hex": hex_str
+        "bin": instr_bin,
+        "hex": instr_hex
     }
-
 
 # Prueba del parser
 file_instr = parse_file("prueba.asm")
@@ -165,16 +175,19 @@ for instr in file_instr:
     # Extraemos el tipo de instrucción
     type_instr = extract_type(instr["mnemonic"])
 
-
-
     # Codificación según tipo
     match type_instr:
         case "R":
-            # Extraemos funct3, funct7 y opcode
+            # Extraemos funct3, funct7 
             funct_3 = get_funct3(instr["mnemonic"])
             funct_7 = get_funct7(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_r_type(instr, funct_3, funct_7, opcode)
+            instrucciones_cod.append(encoded)
+        case "S":
+            funct_3 = get_funct3(instr["mnemonic"])
+            opcode = get_opcode(instr["mnemonic"])
+            encoded = encode_s_type(instr, funct_3, opcode)
             instrucciones_cod.append(encoded)
 
         case "I":
