@@ -135,6 +135,21 @@ def encode_r_type(instr, funct3, funct7, opcode):
         "hex": instr_hex
     }
 
+#codifica una instruccion tipò I en su representacion binaria y hexadecimal
+def encode_i_type(instr, funct3, opcode):
+    rd = int(instr["operands"][0][1:])   # destino
+    rs1 = int(instr["operands"][1][1:])  # registro base
+    imm = int(instr["operands"][2])      # inmediato (decimal)
+
+    imm_bin    = format(imm & 0xFFF, "012b")   # inmediato 12 bits
+    rs1_bin    = format(rs1, "05b")
+    funct3_bin = format(int(funct3, 2), "03b") # viene en binario -> lo normalizamos
+    rd_bin     = format(rd, "05b")
+    opcode_bin = format(int(opcode, 2), "07b") # igual acá
+
+    bin_str = imm_bin + rs1_bin + funct3_bin + rd_bin + opcode_bin
+    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+    
 # Codifica una instrucción tipo-S en su representación binaria
 def encode_s_type(instr, funct3, opcode):
     # Asumimos que funct3 y opcode vienen en string binario
@@ -194,10 +209,7 @@ for instr in file_instr:
             # Extraemos funct3, funct7 y opcode
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
-            rd = instr["operands"][0].replace("x", "")
-            rs1 = instr["operands"][1].replace("x", "")
-            imm = instr["operands"][2]   # aquí puede venir en decimal o negativo
-            encoded = encode_i_type(rd, rs1, imm, funct_3, opcode)
+            encoded = encode_i_type(instr, funct_3, opcode)
             instrucciones_cod.append(encoded)
             
 
