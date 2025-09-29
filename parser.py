@@ -101,12 +101,6 @@ def parse_file(filename):
     return instructions, data_section
 
 def build_label_table(file_instr, data_section, base_data_addr=0x10000000):
-    """
-    Construye la tabla de símbolos (label_table) a partir de:
-    - file_instr: lista de instrucciones parseadas
-    - data_section: lista de datos en la sección .data
-    Retorna un diccionario {label: dirección}
-    """
     label_table = {}
     pc = 0
     data_addr = base_data_addr
@@ -124,6 +118,24 @@ def build_label_table(file_instr, data_section, base_data_addr=0x10000000):
         data_addr += 4  # solo soportamos .word (4 bytes)
 
     return label_table
+
+def resolver_offset(instr, label_table, pc):
+    # Extraer operando de destino (para B y J es la etiqueta)
+    target = instr["operands"][-1]  # último operando siempre es label
+
+    # Verificamos si es un label en la tabla
+    if target in label_table:
+        target_addr = label_table[target]
+        offset = target_addr - pc
+    else:
+        # Si no es label, asumimos que es un número (inmediato)
+        offset = int(target)
+
+    # En RV32I, las instrucciones se alinean a 2 bytes para branches/jumps
+    offset >>= 1
+
+    return offset
+
 
 # Recibe la instrucción y devuelve su tipo (R, I, S, B, U, J)
 def extract_type(mnemonic):
@@ -283,66 +295,57 @@ def encode_s_type(instr, funct3, opcode):
 
 # Codifica una instrucción tipo-B en su representación binaria
 def encode_b_type(instr, funct3, opcode, pc, label_table):
-    rs1 = int(instr["operands"][0][1:])  # ejemplo: beq x1, x2, label
+    rs1 = int(instr["operands"][0][1:])
     rs2 = int(instr["operands"][1][1:])
     label = instr["operands"][2]
 
-    # Buscar dirección del label en la tabla
     if label not in label_table:
         raise ValueError(f"Etiqueta {label} no encontrada")
 
     target_addr = label_table[label]
-    offset = target_addr - pc   # relativo al PC actual
-    imm = offset >> 1           # descartar bit 0 (siempre 0 en branches)
+    offset = target_addr - pc
+    imm = offset >> 1  # descartar bit 0
 
-    # Separar los bits del inmediato según el formato B
-    imm_bin = format(imm & 0x1FFF, "013b")  # 13 bits, incluye el signo
-    imm_12   = imm_bin[0]     # bit 12
-    imm_10_5 = imm_bin[1:7]   # bits 10..5
-    imm_4_1  = imm_bin[7:11]  # bits 4..1
-    imm_11   = imm_bin[11]    # bit 11
+    # Convertir a 13 bits (incluye signo)
+    imm_bin = format(imm & 0x1FFF, "013b")  # 13 bits: [12][11][10:0]
 
+    # Separar los bits según B-type
+    imm_12   = imm_bin[0]       # bit 12
+    imm_11   = imm_bin[1]       # bit 11
+    imm_10_5 = imm_bin[2:8]     # bits 10..5
+    imm_4_1  = imm_bin[8:12]    # bits 4..1
+
+    # Convertir registros y campos
     rs1_bin    = format(rs1, "05b")
     rs2_bin    = format(rs2, "05b")
     funct3_bin = format(int(funct3, 2), "03b")
     opcode_bin = format(int(opcode, 2), "07b")
 
+    # Concatenar en orden correcto para B-type
     bin_str = imm_12 + imm_10_5 + rs2_bin + rs1_bin + funct3_bin + imm_4_1 + imm_11 + opcode_bin
     hex_str = hex(int(bin_str, 2))[2:].zfill(8)
 
     return {"bin": bin_str, "hex": hex_str}
 
 # Codifica una instrucción tipo-J en su representación binaria
-def encode_j_type(instr, imm, opcode):
-    rd = int(instr["operands"][0][1:])   # x1 → 1
-    # Inmediato de 21 bits con signo
-    imm = int(imm)
-    imm_bin = format(imm & 0x1FFFFF, "021b")  # 21 bits
-
-    # El inmediato J se desordena en el encoding:
-    # imm[20] | imm[10:1] | imm[11] | imm[19:12]
-    imm_20     = imm_bin[0]        # bit 20
-    imm_10_1   = imm_bin[11:21]    # bits 10-1
-    imm_11     = imm_bin[10]       # bit 11
-    imm_19_12  = imm_bin[1:9]      # bits 19-12
-
-    # Registros
-    rd_bin     = format(int(rd), "05b")
+def encode_j_type(opcode, rd, offset):
+    rd_bin = format(rd, "05b")
     opcode_bin = format(int(opcode, 2), "07b")
+    
+    # offset de 20 bits para J-type
+    imm_bin = format(offset & 0xFFFFF, "020b")
+    
+    # reordenar bits según formato J-type: [20][10:1][11][19:12]
+    j_bin = imm_bin[0] + imm_bin[10:20] + imm_bin[9] + imm_bin[1:9] + rd_bin + opcode_bin
+    
+    hex_str = hex(int(j_bin, 2))[2:].zfill(8)
+    return {"bin": j_bin, "hex": hex_str}
 
-    # Concatenar en orden correcto
-    bin_str = imm_20 + imm_19_12 + imm_11 + imm_10_1 + rd_bin + opcode_bin
-    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
 
-    return {
-        "bin": bin_str,
-        "hex": hex_str
-    }
-
-# Prueba del parser
+# Parseamos el archivo ASM
 file_instr, data_section = parse_file("prueba.asm")
 
-# Construcción de la tabla de etiquetas
+# Construimos la tabla de etiquetas
 label_table = build_label_table(file_instr, data_section)
 
 # Lista para almacenar instrucciones codificadas
@@ -352,8 +355,12 @@ instrucciones_cod = []
 pc = 0
 
 for instr in file_instr:
-    # Extraemos el tipo de instrucción
+    if instr is None:
+        continue  # ignora líneas vacías o solo etiquetas
+
     type_instr = extract_type(instr["mnemonic"])
+    if type_instr is None:
+        continue  # ignora líneas que no tienen mnemonic
 
     match type_instr:
         case "R":
@@ -361,29 +368,39 @@ for instr in file_instr:
             funct_7 = get_funct7(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_r_type(instr, funct_3, funct_7, opcode)
+
         case "S":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_s_type(instr, funct_3, opcode)
+
         case "I":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_i_type(instr, funct_3, opcode)
+
         case "B":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
-            encoded = encode_b_type(instr, funct_3, opcode, pc, label_table)
+            offset = resolver_offset(instr, label_table, pc)
+            encoded = encode_b_type(instr, funct_3, opcode, offset, label_table)
+
         case "U":
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_u_type(instr, opcode)
+
         case "J":
-            imm = instr["operands"][1]           # inmediato (ej: 1024, -2048)
-            encoded = encode_j_type(instr, imm, opcode)
+            opcode = get_opcode(instr["mnemonic"])
+            rd = int(instr["operands"][0][1:])       # registro destino
+            offset = resolver_offset(instr, label_table, pc)
+            encoded = encode_j_type(opcode, rd, offset)
+
         case _:
-            raise ValueError(f"Instrucción no soportada: {instr['mnemonic']}")
-        
+            print(f"Instrucción no soportada: {instr['mnemonic']}")
+            continue
+
     instrucciones_cod.append(encoded)
-    pc += 4  # Incrementar PC por cada instrucción (asumiendo 4 bytes)
+    pc += 4  # Incrementar PC por cada instrucción (4 bytes)
 
 # Escribir archivo de salida
 with open("resultado.txt", "w") as f:

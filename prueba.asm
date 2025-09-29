@@ -1,15 +1,16 @@
 .data
 var1: .word 10
-var2: .word 255
-contador: .word -5
+var2: .word 4
 
 .text
-# Instrucciones de prueba
-add x5, x6, x7
-sw x5, 0(x10)       # guardar valor en memoria
-addi x1, x2, 15     # inmediato positivo
-slti x3, x4, -3     # inmediato negativo
-beq x1, x2, fin     # salto si son iguales
-add x8, x8, x8      # instrucción que se ejecuta si no saltó
+    add x5, x6, x7       # instrucción tipo R
+    sw x5, 0(x10)        # instrucción tipo S
+    addi x1, x2, 15      # instrucción tipo I
 
-fin: sub x9, x9, x9 # etiqueta de destino
+loop:
+    beq x1, x2, end      # instrucción tipo B
+    addi x1, x1, -1
+    jal x0, loop         # instrucción tipo J (salto atrás)
+
+end:
+    sub x8, x9, x10      # instrucción tipo R
