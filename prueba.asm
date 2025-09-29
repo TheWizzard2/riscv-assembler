@@ -8,3 +8,7 @@ sw x10, 8(x5)
 # tipo i
 addi x1, x2, 10
 slti x3, x4, 100
+
+#tipo U
+lui x1, 0x12345
+auipc x2, 0x10000
