@@ -29,3 +29,7 @@ less_than:
 
 end:
     addi x10, x0, 99           # fin del programa
+
+#tipo U
+lui x1, 0x12345
+auipc x2, 0x10000

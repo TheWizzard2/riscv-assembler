@@ -162,6 +162,41 @@ def encode_i_type(instr, funct3, opcode):
         "bin": bin_str,
         "hex": hex_str
     }
+
+def encode_u_type(instr, opcode):
+    # extraer rd
+    rd = int(instr["operands"][0][1:])  # "x5" -> 5
+    if not (0 <= rd < 32):
+        raise ValueError(f"rd fuera de rango: {rd}")
+
+    # parsear inmediato (soporta "0x..." o decimal)
+    imm_raw = int(instr["operands"][1], 0)
+
+    # decidir imm[31:12] (20 bits)
+    if (imm_raw & 0xFFF) == 0:
+        # si se da un valor de 32-bit alineado a 4K -> tomar bits 31..12 por slicing del binario
+        full_bin = format(imm_raw & 0xFFFFFFFF, "032b")  # 32 bits
+        imm20_bin = full_bin[:20]                         # bits 31..12
+    else:
+        # si se pasa directamente el campo de 20 bits
+        imm20_bin = format(imm_raw & 0xFFFFF, "020b")     # 20 bits
+
+    #se comprueba si se pasa un número >20 bits que no está alineado
+    if imm_raw > 0xFFFFF and (imm_raw & 0xFFF) != 0:
+        raise ValueError(
+            "Inmediato ambiguo/fuera de rango: pase el campo U (20 bits) "
+        )
+
+    # rd y opcode a cadenas
+    rd_bin = format(rd, "05b")
+    opcode_int = int(opcode, 2) if isinstance(opcode, str) else int(opcode)
+    opcode_bin = format(opcode_int & 0x7F, "07b")
+
+    # concatenar
+    bin_str = imm20_bin + rd_bin + opcode_bin
+    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+
+    return {"bin": bin_str, "hex": hex_str}
     
 # Codifica una instrucción tipo-S en su representación binaria
 def encode_s_type(instr, funct3, opcode):
@@ -258,11 +293,13 @@ for instr in file_instr:
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_b_type(instr, funct_3, opcode, symbols)
+            instrucciones_cod.append(encoded)
 
-        case _:
-            raise ValueError(f"Tipo de instrucción no soportado: {type_instr}")
-
-    instrucciones_cod.append(encoded)
+        case "U":
+            # extraemos opcode
+            opcode = get_opcode(instr["mnemonic"])
+            encoded = encode_u_type(instr, opcode)
+            instrucciones_cod.append(encoded)
 
 # Escribir archivos de salida
 with open("resultado.txt", "w") as f:
