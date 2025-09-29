@@ -67,17 +67,25 @@ def parse_line(line, line_number):
 def parse_file(filename):
     lines = read_asm_file(filename)
     instructions = []
+    symbols = {}
+    pc = 0
 
-    # Itera sobre las líneas, limpiándolas y parseándolas
     for i, line in enumerate(lines, start=1):
         clean = clean_line(line)
         if not clean:
             continue
         parsed = parse_line(clean, i)
         if parsed:
-            instructions.append(parsed)
-
-    return instructions
+            # Guardar label con la dirección actual
+            if parsed["label"]:
+                symbols[parsed["label"]] = pc
+            
+            # Si hay instrucción, agregarla
+            if parsed["mnemonic"]:
+                parsed["pc"] = pc
+                instructions.append(parsed)
+                pc += 4  # cada instrucción ocupa 4 bytes
+    return instructions, symbols
 
 # Recibe la instrucción y devuelve su tipo (R, I, S, B, U, J)
 def extract_type(mnemonic):
@@ -149,6 +157,7 @@ def encode_i_type(instr, funct3, opcode):
 
     bin_str = imm_bin + rs1_bin + funct3_bin + rd_bin + opcode_bin
     hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+
     return {
         "bin": bin_str,
         "hex": hex_str
@@ -219,8 +228,42 @@ def encode_s_type(instr, funct3, opcode):
         "hex": instr_hex
     }
 
+# Codifica una instrucción tipo-B en su representación binaria
+def encode_b_type(instr, funct3, opcode, symbols):
+    rs1 = int(instr["operands"][0][1:])   # primer registro
+    rs2 = int(instr["operands"][1][1:])   # segundo registro
+    label = instr["operands"][2]          # etiqueta destino
+
+    # Calculamos el offset relativo
+    target_addr = symbols[label]          # Tabla de simbolos
+    offset = target_addr - instr["pc"]    # PC relativo
+    imm = offset // 2                     # se divide por 2 para eliminar el bit menos significativo
+
+    # Ajuste a 13 bits (soporta negativos)
+    imm_bin = format(imm & 0x1FFF, "013b")
+
+    # Particionamos el inmediato
+    imm_12   = imm_bin[0]         # bit 12
+    imm_10_5 = imm_bin[1:7]       # bits 10–5
+    imm_4_1  = imm_bin[7:11]      # bits 4–1
+    imm_11   = imm_bin[11]        # bit 11
+
+    rs1_bin    = format(rs1, "05b")
+    rs2_bin    = format(rs2, "05b")
+    funct3_bin = format(int(funct3, 2), "03b")
+    opcode_bin = format(int(opcode, 2), "07b")
+
+    # Construcción final según el formato
+    bin_str = imm_12 + imm_10_5 + rs2_bin + rs1_bin + funct3_bin + imm_4_1 + imm_11 + opcode_bin
+    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+
+    return {
+        "bin": bin_str,
+        "hex": hex_str
+    }
+
 # Prueba del parser
-file_instr = parse_file("prueba.asm")
+file_instr, symbols = parse_file("prueba.asm")
 
 # Lista para almacenar instrucciones codificadas
 instrucciones_cod = []
@@ -229,26 +272,27 @@ for instr in file_instr:
     # Extraemos el tipo de instrucción
     type_instr = extract_type(instr["mnemonic"])
 
-    # Codificación según tipo
     match type_instr:
         case "R":
-            # Extraemos funct3, funct7 
             funct_3 = get_funct3(instr["mnemonic"])
             funct_7 = get_funct7(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_r_type(instr, funct_3, funct_7, opcode)
-            instrucciones_cod.append(encoded)
+
         case "S":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_s_type(instr, funct_3, opcode)
-            instrucciones_cod.append(encoded)
 
         case "I":
-            # Extraemos funct3, funct7 y opcode
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_i_type(instr, funct_3, opcode)
+
+        case "B":  # aquí entran las ramas
+            funct_3 = get_funct3(instr["mnemonic"])
+            opcode = get_opcode(instr["mnemonic"])
+            encoded = encode_b_type(instr, funct_3, opcode, symbols)
             instrucciones_cod.append(encoded)
 
         case "U":
@@ -256,11 +300,8 @@ for instr in file_instr:
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_u_type(instr, opcode)
             instrucciones_cod.append(encoded)
-            
 
 # Escribir archivos de salida
 with open("resultado.txt", "w") as f:
     for instr in instrucciones_cod:
         f.write(f"{instr['bin']}   {instr['hex']}\n")
-
-
