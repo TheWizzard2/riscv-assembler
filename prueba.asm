@@ -33,3 +33,6 @@ end:
 #tipo U
 lui x1, 0x12345
 auipc x2, 0x10000
+
+jal x1, 1024     # Salta +1024 y guarda PC+4 en x1
+jal x0, -2048    # Salta -2048 y no guarda retorno
