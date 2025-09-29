@@ -119,6 +119,7 @@ def build_label_table(file_instr, data_section, base_data_addr=0x10000000):
 
     return label_table
 
+# Resuelve el offset para instrucciones B y J
 def resolver_offset(instr, label_table, pc):
     # Extraer operando de destino (para B y J es la etiqueta)
     target = instr["operands"][-1]  # último operando siempre es label
@@ -135,7 +136,6 @@ def resolver_offset(instr, label_table, pc):
     offset >>= 1
 
     return offset
-
 
 # Recibe la instrucción y devuelve su tipo (R, I, S, B, U, J)
 def extract_type(mnemonic):
@@ -340,7 +340,6 @@ def encode_j_type(opcode, rd, offset):
     
     hex_str = hex(int(j_bin, 2))[2:].zfill(8)
     return {"bin": j_bin, "hex": hex_str}
-
 
 # Parseamos el archivo ASM
 file_instr, data_section = parse_file("prueba.asm")
