@@ -262,6 +262,32 @@ def encode_b_type(instr, funct3, opcode, symbols):
         "hex": hex_str
     }
 
+def encode_j_type(instr, imm, opcode):
+    rd = int(instr["operands"][0][1:])   # x1 → 1
+    # Inmediato de 21 bits con signo
+    imm = int(imm)
+    imm_bin = format(imm & 0x1FFFFF, "021b")  # 21 bits
+
+    # El inmediato J se desordena en el encoding:
+    # imm[20] | imm[10:1] | imm[11] | imm[19:12]
+    imm_20     = imm_bin[0]        # bit 20
+    imm_10_1   = imm_bin[11:21]    # bits 10-1
+    imm_11     = imm_bin[10]       # bit 11
+    imm_19_12  = imm_bin[1:9]      # bits 19-12
+
+    # Registros
+    rd_bin     = format(int(rd), "05b")
+    opcode_bin = format(int(opcode, 2), "07b")
+
+    # Concatenar en orden correcto
+    bin_str = imm_20 + imm_19_12 + imm_11 + imm_10_1 + rd_bin + opcode_bin
+    hex_str = hex(int(bin_str, 2))[2:].zfill(8)
+
+    return {
+        "bin": bin_str,
+        "hex": hex_str
+    }
+
 # Prueba del parser
 file_instr, symbols = parse_file("prueba.asm")
 
@@ -299,6 +325,11 @@ for instr in file_instr:
             # extraemos opcode
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_u_type(instr, opcode)
+            instrucciones_cod.append(encoded)
+
+        case "J":
+            imm = instr["operands"][1]           # inmediato (ej: 1024, -2048)
+            encoded = encode_j_type(instr, imm, opcode)
             instrucciones_cod.append(encoded)
 
 # Escribir archivos de salida
