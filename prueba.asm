@@ -1,38 +1,16 @@
-# Programa ejemplo
+.data
+var1: .word 10
+var2: .word 4
 
-# Tipo R
-add  x5, x6, x7      # prueba
-sll  x8, x9, x10
-sub  x11, x12, x13
+.text
+    add x5, x6, x7       # instrucción tipo R
+    sw x5, 0(x10)        # instrucción tipo S
+    addi x1, x2, 15      # instrucción tipo I
 
-# Tipo S
-sw   x10, 8(x5)
-
-# Tipo I
-addi x1, x2, 10
-slti x3, x4, 100
-
-# Tipo B con etiquetas
-start: 
-    beq  x1, x2, equal_label   # si x1 == x2, salta
-    bne  x3, x4, not_equal     # si x3 != x4, salta
-    blt  x5, x6, less_than     # si x5 < x6, salta
-
-equal_label:
-    addi x7, x0, 1             # instrucción en destino 1
-
-not_equal:
-    addi x7, x0, 2             # instrucción en destino 2
-
-less_than:
-    addi x7, x0, 3             # instrucción en destino 3
+loop:
+    beq x1, x2, end      # instrucción tipo B
+    addi x1, x1, -1
+    jal x0, loop         # instrucción tipo J (salto atrás)
 
 end:
-    addi x10, x0, 99           # fin del programa
-
-#tipo U
-lui x1, 0x12345
-auipc x2, 0x10000
-
-jal x1, 1024     # Salta +1024 y guarda PC+4 en x1
-jal x0, -2048    # Salta -2048 y no guarda retorno
+    sub x8, x9, x10      # instrucción tipo R
