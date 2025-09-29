@@ -67,25 +67,63 @@ def parse_line(line, line_number):
 def parse_file(filename):
     lines = read_asm_file(filename)
     instructions = []
-    symbols = {}
-    pc = 0
+    data_section = {}   # ahora será un diccionario
 
+    current_section = None
     for i, line in enumerate(lines, start=1):
         clean = clean_line(line)
         if not clean:
             continue
-        parsed = parse_line(clean, i)
-        if parsed:
-            # Guardar label con la dirección actual
-            if parsed["label"]:
-                symbols[parsed["label"]] = pc
-            
-            # Si hay instrucción, agregarla
-            if parsed["mnemonic"]:
-                parsed["pc"] = pc
+
+        if clean.startswith(".data"):
+            current_section = "data"
+            continue
+        elif clean.startswith(".text"):
+            current_section = "text"
+            continue
+
+        if current_section == "data":
+            # ejemplo: var1: .word 10
+            if ":" in clean:
+                label, rest = clean.split(":", 1)
+                label = label.strip()
+                parts = rest.strip().split()
+                if parts[0] == ".word":
+                    value = int(parts[1])
+                    data_section[label] = value   # guardamos directo en dict
+            continue
+
+        if current_section == "text":
+            parsed = parse_line(clean, i)
+            if parsed:
                 instructions.append(parsed)
-                pc += 4  # cada instrucción ocupa 4 bytes
-    return instructions, symbols
+
+    return instructions, data_section
+
+def build_label_table(file_instr, data_section, base_data_addr=0x10000000):
+    """
+    Construye la tabla de símbolos (label_table) a partir de:
+    - file_instr: lista de instrucciones parseadas
+    - data_section: lista de datos en la sección .data
+    Retorna un diccionario {label: dirección}
+    """
+    label_table = {}
+    pc = 0
+    data_addr = base_data_addr
+
+    # Recorremos instrucciones (sección .text)
+    for instr in file_instr:
+        if instr.get("label"):  # Si la instrucción tiene etiqueta
+            label_table[instr["label"]] = pc
+        pc += 4  # cada instrucción ocupa 4 bytes
+
+    # Recorremos data (sección .data)
+    for entry in data_section:
+        if isinstance(entry, dict) and "label" in entry:
+            label_table[entry["label"]] = data_addr
+        data_addr += 4  # solo soportamos .word (4 bytes)
+
+    return label_table
 
 # Recibe la instrucción y devuelve su tipo (R, I, S, B, U, J)
 def extract_type(mnemonic):
@@ -111,6 +149,20 @@ def get_opcode(mnemonic):
             return instr["opcode"]
     return None
 
+# Parsea una línea en la sección .data
+def parse_data_line(line, line_number):
+    if ":" not in line:
+        raise ValueError(f"Error en línea {line_number}: falta etiqueta en .data")
+
+    label, rest = line.split(":", 1)
+    label = label.strip()
+    tokens = rest.strip().split()
+
+    if tokens[0] != ".word":
+        raise ValueError(f"Error en línea {line_number}: solo se soporta .word")
+
+    value = int(tokens[1])  # lo guardamos como entero
+    return label, value
 
 # Codifica una instrucción tipo-R en su representación binaria
 def encode_r_type(instr, funct3, funct7, opcode):
@@ -163,6 +215,7 @@ def encode_i_type(instr, funct3, opcode):
         "hex": hex_str
     }
 
+# Codifica una instrucción tipo-U en su representación binaria
 def encode_u_type(instr, opcode):
     # extraer rd
     rd = int(instr["operands"][0][1:])  # "x5" -> 5
@@ -229,39 +282,37 @@ def encode_s_type(instr, funct3, opcode):
     }
 
 # Codifica una instrucción tipo-B en su representación binaria
-def encode_b_type(instr, funct3, opcode, symbols):
-    rs1 = int(instr["operands"][0][1:])   # primer registro
-    rs2 = int(instr["operands"][1][1:])   # segundo registro
-    label = instr["operands"][2]          # etiqueta destino
+def encode_b_type(instr, funct3, opcode, pc, label_table):
+    rs1 = int(instr["operands"][0][1:])  # ejemplo: beq x1, x2, label
+    rs2 = int(instr["operands"][1][1:])
+    label = instr["operands"][2]
 
-    # Calculamos el offset relativo
-    target_addr = symbols[label]          # Tabla de simbolos
-    offset = target_addr - instr["pc"]    # PC relativo
-    imm = offset // 2                     # se divide por 2 para eliminar el bit menos significativo
+    # Buscar dirección del label en la tabla
+    if label not in label_table:
+        raise ValueError(f"Etiqueta {label} no encontrada")
 
-    # Ajuste a 13 bits (soporta negativos)
-    imm_bin = format(imm & 0x1FFF, "013b")
+    target_addr = label_table[label]
+    offset = target_addr - pc   # relativo al PC actual
+    imm = offset >> 1           # descartar bit 0 (siempre 0 en branches)
 
-    # Particionamos el inmediato
-    imm_12   = imm_bin[0]         # bit 12
-    imm_10_5 = imm_bin[1:7]       # bits 10–5
-    imm_4_1  = imm_bin[7:11]      # bits 4–1
-    imm_11   = imm_bin[11]        # bit 11
+    # Separar los bits del inmediato según el formato B
+    imm_bin = format(imm & 0x1FFF, "013b")  # 13 bits, incluye el signo
+    imm_12   = imm_bin[0]     # bit 12
+    imm_10_5 = imm_bin[1:7]   # bits 10..5
+    imm_4_1  = imm_bin[7:11]  # bits 4..1
+    imm_11   = imm_bin[11]    # bit 11
 
     rs1_bin    = format(rs1, "05b")
     rs2_bin    = format(rs2, "05b")
     funct3_bin = format(int(funct3, 2), "03b")
     opcode_bin = format(int(opcode, 2), "07b")
 
-    # Construcción final según el formato
     bin_str = imm_12 + imm_10_5 + rs2_bin + rs1_bin + funct3_bin + imm_4_1 + imm_11 + opcode_bin
     hex_str = hex(int(bin_str, 2))[2:].zfill(8)
 
-    return {
-        "bin": bin_str,
-        "hex": hex_str
-    }
+    return {"bin": bin_str, "hex": hex_str}
 
+# Codifica una instrucción tipo-J en su representación binaria
 def encode_j_type(instr, imm, opcode):
     rd = int(instr["operands"][0][1:])   # x1 → 1
     # Inmediato de 21 bits con signo
@@ -289,10 +340,16 @@ def encode_j_type(instr, imm, opcode):
     }
 
 # Prueba del parser
-file_instr, symbols = parse_file("prueba.asm")
+file_instr, data_section = parse_file("prueba.asm")
+
+# Construcción de la tabla de etiquetas
+label_table = build_label_table(file_instr, data_section)
 
 # Lista para almacenar instrucciones codificadas
 instrucciones_cod = []
+
+# PC inicial
+pc = 0
 
 for instr in file_instr:
     # Extraemos el tipo de instrucción
@@ -304,35 +361,40 @@ for instr in file_instr:
             funct_7 = get_funct7(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_r_type(instr, funct_3, funct_7, opcode)
-
         case "S":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_s_type(instr, funct_3, opcode)
-
         case "I":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_i_type(instr, funct_3, opcode)
-
-        case "B":  # aquí entran las ramas
+        case "B":
             funct_3 = get_funct3(instr["mnemonic"])
             opcode = get_opcode(instr["mnemonic"])
-            encoded = encode_b_type(instr, funct_3, opcode, symbols)
-            instrucciones_cod.append(encoded)
-
+            encoded = encode_b_type(instr, funct_3, opcode, pc, label_table)
         case "U":
-            # extraemos opcode
             opcode = get_opcode(instr["mnemonic"])
             encoded = encode_u_type(instr, opcode)
-            instrucciones_cod.append(encoded)
-
         case "J":
             imm = instr["operands"][1]           # inmediato (ej: 1024, -2048)
             encoded = encode_j_type(instr, imm, opcode)
-            instrucciones_cod.append(encoded)
+        case _:
+            raise ValueError(f"Instrucción no soportada: {instr['mnemonic']}")
+        
+    instrucciones_cod.append(encoded)
+    pc += 4  # Incrementar PC por cada instrucción (asumiendo 4 bytes)
 
-# Escribir archivos de salida
+# Escribir archivo de salida
 with open("resultado.txt", "w") as f:
+    # Sección de datos
+    for label, value in data_section.items():
+        bin_val = format(value & 0xFFFFFFFF, "032b")
+        hex_val = hex(value & 0xFFFFFFFF)[2:].zfill(8)
+        f.write(f"{bin_val}   {hex_val}\n")
+        
+    f.write("\n")
+    
+    # Sección instrucciones
     for instr in instrucciones_cod:
         f.write(f"{instr['bin']}   {instr['hex']}\n")
